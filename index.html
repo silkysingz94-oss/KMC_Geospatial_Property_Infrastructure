@@ -3,1125 +3,1226 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KMC GEOAI | Property and Infrastructure Intelligence</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SILKYSINGZ GEOAI | KMC Infrastructure Intelligence</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 :root{
- --navy:#10243a;--blue:#1769aa;--cyan:#00a6a6;
- --bg:#edf2f7;--border:#dce4ed;--muted:#718096;
- --green:#16865b;--orange:#e58a24;--red:#d64545;
+  --navy:#10243a;
+  --blue:#1769aa;
+  --cyan:#00a6a6;
+  --bg:#eef2f6;
+  --panel:#ffffff;
+  --text:#243447;
+  --muted:#718096;
+  --border:#dce4ec;
+  --green:#16865b;
+  --orange:#d97706;
+  --red:#c0392b;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#203044}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+}
 header{
- background:linear-gradient(110deg,#10243a,#174e75);color:white;
- padding:15px 22px;display:flex;justify-content:space-between;
- align-items:center;gap:12px;flex-wrap:wrap
+  background:linear-gradient(110deg,#10243a,#174b70);
+  color:#fff;padding:15px 22px;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:15px;flex-wrap:wrap;
 }
-header h1{font-size:19px;margin:0 0 5px}
-header p{font-size:11px;margin:0;color:#c7d8e8}
-.header-right{text-align:right;font-size:11px;color:#d7e6f3}
-.toolbar{
- display:flex;align-items:center;gap:8px;flex-wrap:wrap;
- padding:9px 14px;background:white;border-bottom:1px solid var(--border)
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:43px;height:43px;border-radius:11px;
+  display:grid;place-items:center;background:#ffffff20;
+  font-size:21px;
 }
-button,select,input,textarea{
- font:inherit;border:1px solid var(--border);border-radius:6px;
- padding:8px;background:white;color:#203044
+.brand h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.4px}
+.brand p{margin:4px 0 0;font-size:11px;color:#c9dbea}
+.header-right{font-size:11px;color:#d7e8f5;text-align:right}
+.status-dot{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:#f59e0b;margin-right:6px;
 }
-button{cursor:pointer;font-size:12px;font-weight:700}
-button.primary{background:var(--blue);color:white;border-color:var(--blue)}
-button.success{background:var(--green);color:white;border-color:var(--green)}
-button:hover{filter:brightness(.96)}
-#status{font-size:11px;color:var(--muted);margin-left:auto}
-.layout{
- display:grid;grid-template-columns:minmax(255px,1fr) minmax(350px,1.8fr) minmax(270px,1fr);
- gap:10px;padding:10px;height:calc(100vh - 112px);min-height:620px
+main{
+  display:grid;grid-template-columns:290px minmax(350px,1fr) 310px;
+  gap:12px;padding:12px;height:calc(100vh - 76px);
+  min-height:650px;
 }
 .panel{
- background:white;border:1px solid var(--border);border-radius:9px;
- overflow-y:auto;min-height:0
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;display:flex;flex-direction:column;
+  min-height:0;
 }
-.section{padding:13px;border-bottom:1px solid var(--border)}
-.section h3{
- font-size:12px;text-transform:uppercase;letter-spacing:.5px;
- color:var(--navy);margin:0 0 12px
+.panel-head{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  font-weight:800;font-size:12px;color:var(--navy);
+  display:flex;justify-content:space-between;align-items:center;
 }
-.field{margin-bottom:10px}
-.field label{display:block;font-size:11px;font-weight:bold;margin-bottom:5px;color:#526477}
-.field input,.field select,.field textarea{width:100%;font-size:12px}
-.field textarea{min-height:55px}
-.checkline{display:flex;align-items:center;gap:8px;font-size:12px;margin:9px 0}
-.checkline input{width:auto}
-.count{margin-left:auto;color:var(--muted);font-size:10px}
-.map-wrap{position:relative;min-height:0}
-#map{height:100%;width:100%;border-radius:8px;background:#dce8ef}
-.map-label{
- position:absolute;top:12px;left:12px;z-index:500;background:white;
- padding:10px 12px;border-radius:7px;box-shadow:0 2px 9px #0002;
- font-size:11px;max-width:250px
+.panel-body{padding:13px;overflow-y:auto;min-height:0}
+.section-title{
+  font-size:10px;text-transform:uppercase;letter-spacing:.8px;
+  color:#718096;font-weight:800;margin:4px 0 9px;
 }
-.map-label strong{display:block;color:var(--navy);margin-bottom:5px}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kpi{background:#f3f7fb;border:1px solid #e4ebf2;border-radius:7px;padding:10px}
-.kpi small{font-size:10px;color:var(--muted);display:block}
-.kpi strong{font-size:21px;color:var(--navy);display:block;margin-top:5px}
-.chart{height:220px;position:relative}
-.small{font-size:10px;color:var(--muted);line-height:1.5}
-.source{font-size:11px;line-height:1.5;padding:7px 0;border-bottom:1px solid #edf1f5}
-.ok{color:var(--green)}.bad{color:var(--red)}.wait{color:var(--orange)}
-.record{border:1px solid var(--border);border-radius:6px;padding:8px;margin:6px 0;font-size:11px}
-.record strong{display:block;color:var(--navy)}
+label{display:block;font-size:11px;font-weight:700;margin:10px 0 5px}
+select,input{
+  width:100%;border:1px solid var(--border);border-radius:6px;
+  padding:9px;font-size:12px;background:#fff;color:var(--text);
+}
+button{
+  border:0;border-radius:6px;padding:9px 11px;
+  font-size:11px;font-weight:800;cursor:pointer;
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--blue);color:white}
+.btn-dark{background:var(--navy);color:white}
+.btn-light{background:#e8eef5;color:#29445e}
+.btn-green{background:var(--green);color:white}
+.btn-row{display:flex;gap:7px;margin-top:10px}
+.btn-row button{flex:1}
+.check-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid #edf1f5;
+  font-size:11px;
+}
+.check-row input{width:auto;margin:0}
+.layer-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.note{
+  background:#f0f6fb;border-left:3px solid var(--blue);
+  padding:9px;font-size:10px;line-height:1.5;
+  border-radius:4px;margin-top:12px;color:#40566c;
+}
+.warning{
+  background:#fff7e8;border-left:3px solid var(--orange);
+  padding:9px;font-size:10px;line-height:1.5;
+  border-radius:4px;margin-top:10px;color:#775019;
+}
+#map{width:100%;height:100%;min-height:400px;background:#dce5e9}
+.map-panel{position:relative;min-width:0}
+.map-toolbar{
+  position:absolute;z-index:500;top:12px;left:12px;
+  display:flex;gap:6px;flex-wrap:wrap;max-width:90%;
+}
+.map-toolbar button{
+  background:#fff;color:#263b50;border:1px solid #d8e0e8;
+  box-shadow:0 2px 7px #0002;
+}
+.map-attribution{
+  position:absolute;z-index:500;bottom:8px;left:8px;
+  background:#ffffffdf;padding:5px 8px;border-radius:4px;
+  font-size:9px;color:#536477;
+}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{
+  padding:11px;background:#f5f8fb;border:1px solid #e5ebf1;
+  border-radius:8px;min-width:0;
+}
+.kpi .value{font-size:21px;font-weight:850;color:var(--navy)}
+.kpi .name{font-size:10px;color:#718096;margin-top:4px}
+.kpi .unit{font-size:10px;color:#718096}
+.chart-wrap{height:210px;margin:8px 0 17px;position:relative}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.legend-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;padding:5px 0;
+}
+.line-symbol{width:20px;height:4px;border-radius:4px}
+.diagnostics{
+  font-size:10px;line-height:1.65;background:#f7f9fb;
+  border:1px solid var(--border);border-radius:7px;padding:9px;
+  overflow-wrap:anywhere;
+}
+.diagnostics .ok{color:var(--green)}
+.diagnostics .bad{color:var(--red)}
+.small-muted{font-size:10px;color:var(--muted);line-height:1.5}
+.progress{
+  height:5px;background:#e5ebf1;border-radius:5px;
+  overflow:hidden;margin-top:8px;
+}
+.progress span{display:block;height:100%;width:0;background:var(--cyan)}
 footer{
- background:var(--navy);color:#d8e4ef;text-align:center;
- padding:9px;font-size:10px;line-height:1.6
+  padding:10px 15px;text-align:center;background:#10243a;color:#d5e2ec;
+  font-size:10px;line-height:1.6;
 }
-@media(max-width:1000px){
- .layout{grid-template-columns:260px 1fr;height:auto;min-height:1000px}
- .right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
- .map-wrap{height:650px}
+.leaflet-popup-content{font-size:11px;line-height:1.5}
+.leaflet-control-attribution{font-size:9px!important}
+@media(max-width:1050px){
+  main{grid-template-columns:260px minmax(300px,1fr);height:auto}
+  .right-panel{grid-column:1/-1;max-height:520px}
+  .map-panel{height:650px}
 }
 @media(max-width:650px){
- .layout{display:flex;flex-direction:column;height:auto}
- .map-wrap{height:500px}
- #map{height:500px}
- .right{display:block}
- #status{width:100%;margin:0}
+  main{display:flex;flex-direction:column;height:auto}
+  .panel{min-height:300px}
+  .map-panel{height:520px;min-height:520px}
+  .right-panel{max-height:none}
+  header{padding:12px}
 }
 </style>
 </head>
 
 <body>
-
 <header>
- <div>
-  <h1><i class="fa-solid fa-map-location-dot"></i> KMC GEOAI</h1>
-  <p>GEOSPATIAL PROPERTY • INFRASTRUCTURE • MUNICIPAL INTELLIGENCE</p>
- </div>
- <div class="header-right">
-  <strong>Kanifing Municipal Council</strong><br>
-  The Gambia | GIS / Cartography
- </div>
+  <div class="brand">
+    <div class="brand-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+    <div>
+      <h1>SILKYSINGZ GEOAI | KMC INFRASTRUCTURE INTELLIGENCE</h1>
+      <p>Kanifing Municipal Council • Live Open Data Extraction • Spatial Analytics</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div><span class="status-dot" id="statusDot"></span><span id="statusText">Initializing sources...</span></div>
+    <div id="lastUpdated">Waiting for online data</div>
+  </div>
 </header>
 
-<div class="toolbar">
- <button class="primary" onclick="loadAllData()">⟳ Refresh GitHub Data</button>
- <button onclick="zoomToSelection()">⌖ Zoom to Selection</button>
- <button onclick="resetFilters()">Reset Filters</button>
- <button onclick="exportVisible()">Export Visible GeoJSON</button>
- <span id="status">Initialising...</span>
-</div>
+<main>
+  <!-- LEFT: CONTROLS -->
+  <section class="panel">
+    <div class="panel-head">
+      <span><i class="fa-solid fa-sliders"></i> DATA & CONTROLS</span>
+      <span id="sourceStatus" class="small-muted">ONLINE</span>
+    </div>
+    <div class="panel-body">
 
-<div class="layout">
+      <div class="section-title">Administrative selection</div>
+      <label for="lgaSelect">Local Government Area</label>
+      <select id="lgaSelect">
+        <option value="Kanifing">Kanifing</option>
+      </select>
 
-<!-- LEFT: CONTROLS -->
-<aside class="panel">
+      <label for="districtSelect">District</label>
+      <select id="districtSelect">
+        <option value="">All districts</option>
+      </select>
 
- <div class="section">
-  <h3>Administrative Selection</h3>
+      <div class="btn-row">
+        <button class="btn-primary" id="applyBtn">
+          <i class="fa-solid fa-filter"></i> Apply
+        </button>
+        <button class="btn-light" id="resetBtn">
+          <i class="fa-solid fa-rotate"></i> Reset
+        </button>
+      </div>
 
-  <div class="field">
-   <label>Local Government Area</label>
-   <select id="lga"><option value="ALL">All LGAs</option></select>
-  </div>
+      <div class="section-title" style="margin-top:19px">Online infrastructure layers</div>
 
-  <div class="field">
-   <label>District</label>
-   <select id="district"><option value="ALL">All districts</option></select>
-  </div>
+      <div class="check-row">
+        <input type="checkbox" id="businessToggle" checked>
+        <span class="layer-dot" style="background:#e87922"></span>
+        <label for="businessToggle" style="margin:0">Businesses & commercial places</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="educationToggle" checked>
+        <span class="layer-dot" style="background:#8b5cf6"></span>
+        <label for="educationToggle" style="margin:0">Education facilities</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="healthToggle" checked>
+        <span class="layer-dot" style="background:#dc4560"></span>
+        <label for="healthToggle" style="margin:0">Health facilities</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="majorToggle" checked>
+        <span class="layer-dot" style="background:#d62728"></span>
+        <label for="majorToggle" style="margin:0">Major roads</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="minorToggle" checked>
+        <span class="layer-dot" style="background:#2676bd"></span>
+        <label for="minorToggle" style="margin:0">Minor roads</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="districtToggle" checked>
+        <span class="layer-dot" style="background:#334155"></span>
+        <label for="districtToggle" style="margin:0">District boundaries</label>
+      </div>
 
-  <div class="field">
-   <label>Ward</label>
-   <select id="ward"><option value="ALL">All wards</option></select>
-  </div>
+      <div class="section-title" style="margin-top:19px">Map display</div>
+      <label for="basemapSelect">Basemap</label>
+      <select id="basemapSelect">
+        <option value="osm">OpenStreetMap</option>
+        <option value="satellite">Satellite imagery</option>
+        <option value="terrain">Terrain</option>
+      </select>
 
-  <div class="field">
-   <label>Search EA / Ward / District</label>
-   <input id="search" placeholder="Enter search term">
-  </div>
+      <div class="btn-row">
+        <button class="btn-dark" id="refreshBtn">
+          <i class="fa-solid fa-cloud-arrow-down"></i> Fetch online data
+        </button>
+      </div>
 
-  <button class="primary" style="width:100%" onclick="applyFilters()">Apply Selection</button>
- </div>
+      <div class="section-title" style="margin-top:19px">Download data</div>
+      <div class="btn-row">
+        <button class="btn-light" id="exportFacilitiesBtn">Facilities CSV</button>
+        <button class="btn-light" id="exportRoadsBtn">Roads GeoJSON</button>
+      </div>
 
- <div class="section">
-  <h3>Map Layers</h3>
+      <div class="note">
+        <b>Live extraction:</b> infrastructure is queried directly from OpenStreetMap using the Overpass API. Results depend on what contributors have mapped. A zero count means no matching feature was returned for that query; it does not prove that the facility does not exist.
+      </div>
 
-  <div class="checkline">
-   <input type="checkbox" id="showEA" checked onchange="renderLayers()">
-   <label for="showEA">Enumeration Areas</label>
-   <span class="count" id="nEA">0</span>
-  </div>
+      <div class="warning">
+        <b>Boundary limitation:</b> this application uses published LGA and district boundaries. It does not contain census EA boundaries or household/property coordinates.
+      </div>
 
-  <div class="checkline">
-   <input type="checkbox" id="showBusiness" checked onchange="renderLayers()">
-   <label for="showBusiness">Business Count by EA</label>
-   <span class="count" id="nBusiness">0</span>
-  </div>
+      <div class="section-title" style="margin-top:18px">Source diagnostics</div>
+      <div id="diagnostics" class="diagnostics">
+        Waiting for boundary and infrastructure requests...
+      </div>
+      <div class="progress"><span id="progressBar"></span></div>
+    </div>
+  </section>
 
-  <div class="checkline">
-   <input type="checkbox" id="showEducation" checked onchange="renderLayers()">
-   <label for="showEducation">Education Facilities</label>
-   <span class="count" id="nEducation">0</span>
-  </div>
+  <!-- CENTER: MAP -->
+  <section class="panel map-panel">
+    <div class="panel-head">
+      <span><i class="fa-solid fa-earth-africa"></i> INTERACTIVE SPATIAL MAP</span>
+      <span id="mapCount" class="small-muted">0 features</span>
+    </div>
+    <div style="flex:1;position:relative;min-height:0">
+      <div id="map"></div>
+      <div class="map-toolbar">
+        <button id="zoomBtn"><i class="fa-solid fa-crosshairs"></i> Zoom to KMC</button>
+        <button id="homeBtn"><i class="fa-solid fa-house"></i> Full extent</button>
+      </div>
+      <div class="map-attribution">Infrastructure: © OpenStreetMap contributors • Boundaries: geoBoundaries</div>
+    </div>
+  </section>
 
-  <div class="checkline">
-   <input type="checkbox" id="showMajor" checked onchange="renderLayers()">
-   <label for="showMajor">Major Roads</label>
-   <span class="count" id="nMajor">0</span>
-  </div>
+  <!-- RIGHT: ANALYTICS -->
+  <section class="panel right-panel">
+    <div class="panel-head">
+      <span><i class="fa-solid fa-chart-column"></i> SPATIAL ANALYTICS</span>
+      <span class="small-muted">Selected area</span>
+    </div>
+    <div class="panel-body">
 
-  <div class="checkline">
-   <input type="checkbox" id="showMinor" onchange="renderLayers()">
-   <label for="showMinor">Minor Roads</label>
-   <span class="count" id="nMinor">0</span>
-  </div>
+      <div class="section-title">Infrastructure summary</div>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="value" id="kpiBusiness">0</div>
+          <div class="name">Businesses / commercial</div>
+        </div>
+        <div class="kpi">
+          <div class="value" id="kpiEducation">0</div>
+          <div class="name">Education facilities</div>
+        </div>
+        <div class="kpi">
+          <div class="value" id="kpiHealth">0</div>
+          <div class="name">Health facilities</div>
+        </div>
+        <div class="kpi">
+          <div class="value" id="kpiRoads">0</div>
+          <div class="name">Road features</div>
+        </div>
+      </div>
 
-  <div class="checkline">
-   <input type="checkbox" id="showProperties" checked onchange="renderLayers()">
-   <label for="showProperties">Collected Properties</label>
-   <span class="count" id="nProperties">0</span>
-  </div>
- </div>
+      <div class="section-title" style="margin-top:20px">Infrastructure distribution</div>
+      <div class="chart-wrap"><canvas id="distributionChart"></canvas></div>
 
- <div class="section">
-  <h3>GitHub Data Diagnostics</h3>
-  <div id="sources">
-   <div class="source wait">Waiting for GitHub data...</div>
-  </div>
-  <p class="small">
-   Repository: silkysingz94-oss/KMC_Geospatial_Property_Infrastructure
-   <br>Branch: main
-  </p>
- </div>
+      <div class="section-title">Road network composition</div>
+      <div class="chart-wrap"><canvas id="roadChart"></canvas></div>
 
- <div class="section">
-  <h3>Exports</h3>
-  <button style="width:100%;margin-bottom:7px" onclick="exportPropertiesCSV()">Property CSV</button>
-  <button style="width:100%;margin-bottom:7px" onclick="exportPropertiesGeoJSON()">Property GeoJSON</button>
-  <button style="width:100%;margin-bottom:7px" onclick="exportBusinessCSV()">Business Summary CSV</button>
-  <button style="width:100%" onclick="exportEACSV()">Selected EA CSV</button>
- </div>
+      <div class="section-title">Map legend</div>
+      <div class="legend-item"><span class="layer-dot" style="background:#e87922"></span> Businesses / commercial</div>
+      <div class="legend-item"><span class="layer-dot" style="background:#8b5cf6"></span> Education facilities</div>
+      <div class="legend-item"><span class="layer-dot" style="background:#dc4560"></span> Health facilities</div>
+      <div class="legend-item"><span class="line-symbol" style="background:#d62728"></span> Major roads</div>
+      <div class="legend-item"><span class="line-symbol" style="background:#2676bd"></span> Minor roads</div>
+      <div class="legend-item"><span class="line-symbol" style="background:#334155"></span> District boundary</div>
 
-</aside>
+      <div class="section-title" style="margin-top:19px">Selected administrative area</div>
+      <div class="diagnostics" id="selectionSummary">
+        LGA: Kanifing<br>District: All districts
+      </div>
 
-<!-- CENTRE: MAP -->
-<main class="map-wrap">
- <div id="map"></div>
- <div class="map-label">
-  <strong>KMC Spatial Intelligence</strong>
-  <span id="selectionLabel">All available areas</span>
-  <div id="mapInfo" class="small">Loading datasets...</div>
- </div>
+      <div class="section-title" style="margin-top:19px">Methodology</div>
+      <div class="small-muted">
+        1. Retrieve published Gambia administrative boundary metadata.<br>
+        2. Download the LGA and district GeoJSON geometries.<br>
+        3. Use the selected LGA geometry to establish the query extent.<br>
+        4. Query OpenStreetMap features through Overpass API.<br>
+        5. Filter returned infrastructure against the selected boundary.<br>
+        6. Calculate feature counts and road feature totals from the returned data.
+      </div>
+
+      <div class="note">
+        Road statistics in this dashboard are feature counts, not road length or road density. Road length and density require a suitable projected coordinate system and additional processing.
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- RIGHT: ANALYTICS -->
-<aside class="panel right">
-
- <div class="section">
-  <h3>Spatial Analytics</h3>
-  <div class="kpis">
-   <div class="kpi"><small>Selected EAs</small><strong id="kEA">0</strong></div>
-   <div class="kpi"><small>Businesses</small><strong id="kBusiness">0</strong></div>
-   <div class="kpi"><small>Education Facilities</small><strong id="kEducation">0</strong></div>
-   <div class="kpi"><small>Field Properties</small><strong id="kProperties">0</strong></div>
-   <div class="kpi"><small>Major Road Features</small><strong id="kMajor">0</strong></div>
-   <div class="kpi"><small>Minor Road Features</small><strong id="kMinor">0</strong></div>
-  </div>
- </div>
-
- <div class="section">
-  <h3>Infrastructure Distribution</h3>
-  <div class="chart"><canvas id="infraChart"></canvas></div>
-  <p class="small">Business indicator represents the sum of BUSINESS ENTITY values joined to the selected EAs.</p>
- </div>
-
- <div class="section">
-  <h3>Selected EA Summary</h3>
-  <div id="eaSummary" class="small">No selected data.</div>
- </div>
-
- <div class="section">
-  <h3>Data Quality Checks</h3>
-  <div id="quality" class="small">Waiting for datasets.</div>
- </div>
-
- <div class="section">
-  <h3>Property Enumeration</h3>
-
-  <div class="field">
-   <label>Property ID</label>
-   <input id="propertyID" placeholder="KMC-PROP-0001">
-  </div>
-
-  <div class="field">
-   <label>Property Type</label>
-   <select id="propertyType">
-    <option>Residential</option>
-    <option>Commercial</option>
-    <option>Mixed Use</option>
-    <option>Government / Institutional</option>
-    <option>Industrial</option>
-    <option>Other</option>
-   </select>
-  </div>
-
-  <div class="field">
-   <label>Building Condition</label>
-   <select id="condition">
-    <option>Good</option><option>Fair</option><option>Poor</option>
-    <option>Under Construction</option><option>Vacant</option>
-   </select>
-  </div>
-
-  <div class="field">
-   <label>Number of Floors</label>
-   <input id="floors" type="number" min="0" value="1">
-  </div>
-
-  <div class="field">
-   <label>Household Count</label>
-   <input id="households" type="number" min="0" value="0">
-  </div>
-
-  <div class="field">
-   <label>Notes</label>
-   <textarea id="notes" placeholder="Field observations"></textarea>
-  </div>
-
-  <button class="success" style="width:100%" onclick="startCapture()">Capture on Map</button>
-  <button style="width:100%;margin-top:6px" onclick="captureGPS()">Use Device GPS</button>
-  <p class="small" id="captureStatus">Select a location on the map or use GPS.</p>
- </div>
-
- <div class="section">
-  <h3>Recent Property Records</h3>
-  <div id="records" class="small">No records collected.</div>
- </div>
-
-</aside>
-</div>
-
 <footer>
- Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics
- <br>SILKYSINGZ GEOAI • Research and educational use
+  Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+  SILKYSINGZ GEOAI • Research and educational use
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
 <script>
-/* =========================================================
-   1. GITHUB DATA CONFIGURATION
-   ========================================================= */
+/* ============================================================
+   KMC GEOAI — DIRECT ONLINE DATA EXTRACTION
+   Administrative boundaries: geoBoundaries API
+   Infrastructure: OpenStreetMap Overpass API
+   No GitHub Raw infrastructure file dependency
+============================================================ */
 
-const REPO = "silkysingz94-oss/KMC_Geospatial_Property_Infrastructure";
-const BRANCH = "main";
+const GEOBOUNDARIES_API =
+  "https://www.geoboundaries.org/api/current/gbOpen/GMB/";
 
-const FILES = {
- ea:"Census_EAs_Geo.json",
- business:"Business_Entity.csv",
- education:"Education_Facility.geojson",
- major:"Major_Road.geojson",
- minor:"Minor_Road.geojson"
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter"
+];
+
+const map = L.map("map", {
+  zoomControl:true,
+  preferCanvas:true
+}).setView([13.455,-16.675],12);
+
+const baseLayers = {
+  osm:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:20,
+    attribution:"© OpenStreetMap contributors"
+  }),
+  satellite:L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
+      maxZoom:19,
+      attribution:"Tiles © Esri"
+    }),
+  terrain:L.tileLayer(
+    "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{
+      maxZoom:17,
+      attribution:"© OpenTopoMap contributors"
+    })
 };
 
-const DATA = {
- ea:[],
- business:[],
- education:[],
- major:[],
- minor:[]
+let activeBase = baseLayers.osm.addTo(map);
+
+const layerGroups = {
+  lga:L.featureGroup().addTo(map),
+  district:L.featureGroup().addTo(map),
+  business:L.featureGroup().addTo(map),
+  education:L.featureGroup().addTo(map),
+  health:L.featureGroup().addTo(map),
+  major:L.featureGroup().addTo(map),
+  minor:L.featureGroup().addTo(map)
 };
 
-const SELECTED = {
- ea:[],
- business:[],
- education:[],
- major:[],
- minor:[]
+let lgaData = null;
+let districtData = null;
+let selectedLGA = null;
+let selectedDistrict = null;
+
+let allFacilities = {
+  business:[],
+  education:[],
+  health:[]
 };
 
-let businessByEA = new Map();
-let businessTotal = 0;
-let propertyRecords = [];
-let captureMode = false;
-let chart = null;
+let allRoads = {
+  major:[],
+  minor:[]
+};
 
-function rawURL(filename){
- return `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${encodeURIComponent(filename)}?v=${Date.now()}`;
+let charts = {};
+let requestRunning = false;
+let lastOSMTimestamp = null;
+
+const $ = id => document.getElementById(id);
+
+function setStatus(message, good=true){
+  $("statusText").textContent=message;
+  $("statusDot").style.background=good?"#22c55e":"#f59e0b";
 }
 
-function setStatus(message,color="#718096"){
- const el=document.getElementById("status");
- el.textContent=message;
- el.style.color=color;
+function setProgress(value){
+  $("progressBar").style.width=Math.max(0,Math.min(100,value))+"%";
 }
 
-function sourceStatus(key,message,ok){
- let el=document.getElementById("src-"+key);
- if(!el){
-  el=document.createElement("div");
-  el.id="src-"+key;
-  el.className="source";
-  document.getElementById("sources").appendChild(el);
- }
- el.innerHTML=`<b>${key.toUpperCase()}</b><br>
- <span class="${ok===true?"ok":ok===false?"bad":"wait"}">${escapeHTML(message)}</span>`;
+function numberFormat(value){
+  return Number(value||0).toLocaleString();
+}
+
+function normalize(value){
+  return String(value||"")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9]/g,"");
+}
+
+function featureCollection(features){
+  return {type:"FeatureCollection",features:features||[]};
+}
+
+function safeName(properties){
+  const p=properties||{};
+  return p.shapeName || p.shapeName_en || p.NAME_1 ||
+         p.NAME_2 || p.name || p.admin_name ||
+         p.name_en || p.NAME || p.Name || "Unnamed";
+}
+
+function setDiagnostics(lines){
+  $("diagnostics").innerHTML=lines.join("<br>");
 }
 
 function escapeHTML(value){
- return String(value??"").replace(/[&<>"']/g,c=>({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- })[c]);
+  return String(value??"").replace(/[&<>"']/g,char=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[char]);
 }
 
-/* IMPORTANT: fetch the actual raw file, not GitHub's HTML page. */
-async function fetchRaw(filename){
- const response=await fetch(rawURL(filename),{
-  cache:"no-store",
-  headers:{"Accept":"application/json,text/csv,*/*"}
- });
-
- if(!response.ok) throw new Error("HTTP "+response.status);
- const text=await response.text();
-
- if(!text || !text.trim()){
-  throw new Error("File is empty (0 bytes) or has no readable response body.");
- }
- return text;
-}
-
-function parseGeoJSON(text,filename){
- let json;
- try{json=JSON.parse(text);}
- catch(e){throw new Error("Invalid JSON: "+e.message);}
-
- if(json.type==="FeatureCollection" && Array.isArray(json.features)){
-  return json.features.filter(f=>f && f.geometry);
- }
- if(json.type==="Feature" && json.geometry) return [json];
-
- // Also support an array of GeoJSON features.
- if(Array.isArray(json)){
-  return json.filter(f=>f && f.geometry);
- }
-
- throw new Error(filename+" does not contain a GeoJSON FeatureCollection.");
-}
-
-async function loadGeoJSON(key){
- const filename=FILES[key];
- sourceStatus(key,"Downloading "+filename,false);
-
- try{
-  const text=await fetchRaw(filename);
-  const features=parseGeoJSON(text,filename);
-  DATA[key]=features;
-  sourceStatus(key,features.length.toLocaleString()+" spatial features loaded",true);
-  return true;
- }catch(e){
-  DATA[key]=[];
-  sourceStatus(key,e.message,false);
-  console.error(key,e);
-  return false;
- }
-}
-
-async function loadBusinessCSV(){
- const key="business";
- sourceStatus(key,"Downloading Business_Entity.csv",null);
-
- try{
-  const text=await fetchRaw(FILES.business);
-  const parsed=Papa.parse(text,{
-   header:true,
-   skipEmptyLines:true,
-   dynamicTyping:false,
-   transformHeader:h=>h.replace(/^\uFEFF/,"").trim()
-  });
-
-  if(!parsed.data.length) throw new Error("CSV contains no data rows.");
-
-  DATA.business=parsed.data;
-  buildBusinessJoin();
-
-  sourceStatus(key,
-   DATA.business.length.toLocaleString()+" EA business summary rows loaded; "+
-   businessTotal.toLocaleString()+" businesses counted",true);
-  return true;
- }catch(e){
-  DATA.business=[];
-  businessByEA.clear();
-  businessTotal=0;
-  sourceStatus(key,e.message,false);
-  console.error("Business CSV:",e);
-  return false;
- }
-}
-
-async function loadAllData(){
- setStatus("Loading GitHub datasets...");
- document.getElementById("sources").innerHTML="";
-
- const results=await Promise.all([
-  loadGeoJSON("ea"),
-  loadBusinessCSV(),
-  loadGeoJSON("education"),
-  loadGeoJSON("major"),
-  loadGeoJSON("minor")
- ]);
-
- populateAdministrativeFilters();
- applyFilters();
-
- const success=results.filter(Boolean).length;
- setStatus(success+"/5 GitHub datasets loaded",
-  success===5?"#16865b":"#d64545");
-}
-
-/* =========================================================
-   2. FIELD NAME NORMALISATION
-   Handles: LGA NAME, lganame, LGA_NAME, etc.
-   ========================================================= */
-
-function cleanKey(key){
- return String(key??"").toLowerCase().replace(/[^a-z0-9]/g,"");
-}
-
-function propsOf(row){
- return row?.properties || row || {};
-}
-
-function getValue(row,candidates){
- const props=propsOf(row);
- const keys=Object.keys(props);
- const lookup=new Map(keys.map(k=>[cleanKey(k),k]));
-
- for(const candidate of candidates){
-  const original=lookup.get(cleanKey(candidate));
-  if(original!==undefined && props[original]!==null &&
-     props[original]!==undefined && String(props[original]).trim()!==""){
-   return props[original];
+async function fetchJSON(url, timeout=45000){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+  try{
+    const response=await fetch(url,{signal:controller.signal});
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    return await response.json();
+  }finally{
+    clearTimeout(timer);
   }
- }
- return "";
 }
 
-function numberValue(value){
- if(value===null || value===undefined || value==="") return 0;
- const n=Number(String(value).replace(/,/g,"").trim());
- return Number.isFinite(n)?n:0;
-}
-
-function lgaOf(f){
- return getValue(f,["lganame","LGA NAME","lga","local government area"]);
-}
-function districtOf(f){
- return getValue(f,["distname","DISTRICT NAME","district","district name"]);
-}
-function wardOf(f){
- return getValue(f,["wardname","WARD NAME","ward","ward name"]);
-}
-function eaCodeOf(f){
- return getValue(f,["feacode","EA CODE","eacode","ea_code","ea code","ea"]);
-}
-function eaNameOf(f){
- return getValue(f,["eaname","EA NAME","ea_name","name"]);
-}
-
-/* =========================================================
-   3. BUSINESS CSV -> EA JOIN
-   Your CSV contains counts, not individual GPS points.
-   ========================================================= */
-
-function codeKey(value){
- if(value===null || value===undefined) return "";
- return String(value).trim().replace(/\.0$/,"").replace(/\s+/g,"");
-}
-
-function buildBusinessJoin(){
- businessByEA=new Map();
- businessTotal=0;
-
- DATA.business.forEach(row=>{
-  const code=codeKey(getValue(row,[
-   "EA CODE","eacode","ea_code","feacode"
-  ]));
-
-  if(!code) return;
-
-  const count=numberValue(getValue(row,[
-   "BUSINESS ENTITY","business_entity","businesses",
-   "business_count","number_of_businesses","count"
-  ]));
-
-  businessByEA.set(code,(businessByEA.get(code)||0)+count);
-  businessTotal+=count;
- });
-}
-
-/* =========================================================
-   4. ADMINISTRATIVE FILTERS
-   ========================================================= */
-
-function setOptions(id,values,label){
- const el=document.getElementById(id);
- const old=el.value;
- el.innerHTML="";
- el.add(new Option(label,"ALL"));
-
- [...new Set(values.filter(v=>v!=="" && v!==null && v!==undefined))]
-  .sort((a,b)=>String(a).localeCompare(String(b)))
-  .forEach(v=>el.add(new Option(v,v)));
-
- if([...el.options].some(o=>o.value===old)) el.value=old;
-}
-
-function populateAdministrativeFilters(){
- setOptions("lga",DATA.ea.map(lgaOf),"All LGAs");
- setOptions("district",DATA.ea.map(districtOf),"All districts");
- setOptions("ward",DATA.ea.map(wardOf),"All wards");
-
- const lga=document.getElementById("lga");
- const option=[...lga.options].find(o=>cleanKey(o.value)==="kanifing");
- if(option) lga.value=option.value;
-
- lga.onchange=()=>{
-  updateDistricts();
-  applyFilters();
- };
- document.getElementById("district").onchange=()=>{
-  updateWards();
-  applyFilters();
- };
- document.getElementById("ward").onchange=applyFilters;
-
- updateDistricts();
- updateWards();
-}
-
-function updateDistricts(){
- const lga=document.getElementById("lga").value;
- const rows=DATA.ea.filter(f=>lga==="ALL"||cleanKey(lgaOf(f))===cleanKey(lga));
- setOptions("district",rows.map(districtOf),"All districts");
- updateWards();
-}
-
-function updateWards(){
- const lga=document.getElementById("lga").value;
- const district=document.getElementById("district").value;
-
- const rows=DATA.ea.filter(f=>
-  (lga==="ALL"||cleanKey(lgaOf(f))===cleanKey(lga)) &&
-  (district==="ALL"||cleanKey(districtOf(f))===cleanKey(district))
- );
- setOptions("ward",rows.map(wardOf),"All wards");
-}
-
-/* =========================================================
-   5. SPATIAL FILTERING
-   Uses intersection, not whole-road centroid.
-   ========================================================= */
-
-function validPolygon(f){
- return f?.geometry &&
-  ["Polygon","MultiPolygon"].includes(f.geometry.type);
-}
-
-function selectedPolygonCollection(){
- return {
-  type:"FeatureCollection",
-  features:SELECTED.ea.filter(validPolygon)
- };
-}
-
-function intersectsSelectedArea(feature,polygons){
- if(!feature?.geometry) return false;
- if(!polygons.features.length) return false;
-
- try{
-  const featureBBox=turf.bbox(feature);
-
-  for(const polygon of polygons.features){
-   const polygonBBox=turf.bbox(polygon);
-
-   // Fast bounding-box rejection before geometry intersection.
-   if(featureBBox[2]<polygonBBox[0] ||
-      featureBBox[0]>polygonBBox[2] ||
-      featureBBox[3]<polygonBBox[1] ||
-      featureBBox[1]>polygonBBox[3]) continue;
-
-   try{
-    if(turf.booleanIntersects(feature,polygon)) return true;
-   }catch(e){
-    // Continue checking the remaining selected EA polygons.
-   }
+async function fetchBoundary(level){
+  const metadataURL=GEOBOUNDARIES_API+level+"/";
+  const metadata=await fetchJSON(metadataURL);
+  if(!metadata || !metadata.gjDownloadURL){
+    throw new Error("No GeoJSON download link in boundary metadata");
   }
- }catch(e){
-  console.warn("Spatial intersection error:",e);
- }
- return false;
+  const geojson=await fetchJSON(metadata.gjDownloadURL,60000);
+  if(geojson.type==="FeatureCollection") return geojson;
+  if(geojson.type==="Feature") return featureCollection([geojson]);
+  throw new Error("Unexpected boundary GeoJSON format");
 }
 
-function matchesAdmin(f){
- const lga=document.getElementById("lga").value;
- const district=document.getElementById("district").value;
- const ward=document.getElementById("ward").value;
- const search=cleanKey(document.getElementById("search").value);
-
- if(lga!=="ALL" && cleanKey(lgaOf(f))!==cleanKey(lga)) return false;
- if(district!=="ALL" && cleanKey(districtOf(f))!==cleanKey(district)) return false;
- if(ward!=="ALL" && cleanKey(wardOf(f))!==cleanKey(ward)) return false;
-
- if(search){
-  const text=cleanKey([
-   eaCodeOf(f),eaNameOf(f),lgaOf(f),districtOf(f),wardOf(f)
-  ].join(" "));
-  if(!text.includes(search)) return false;
- }
- return true;
+function getBoundaryName(feature){
+  const p=feature.properties||{};
+  const candidates=[
+    p.shapeName,p.shapeName_en,p.shapeName_local,
+    p.NAME_1,p.NAME_2,p.name,p.NAME,p.Name,
+    p.admin1Name,p.admin2Name
+  ];
+  return candidates.find(v=>v!==undefined && v!==null && String(v).trim()) || "Unnamed";
 }
 
-function applyFilters(){
- SELECTED.ea=DATA.ea.filter(matchesAdmin);
- const polygons=selectedPolygonCollection();
-
- // Business summaries are joined using EA CODE.
- // This is not a point layer.
- SELECTED.business=SELECTED.ea.filter(f=>
-  businessByEA.has(codeKey(eaCodeOf(f)))
- );
-
- // Intersect line/polygon/point features against selected EAs.
- SELECTED.education=DATA.education.filter(f=>
-  intersectsSelectedArea(f,polygons)
- );
- SELECTED.major=DATA.major.filter(f=>
-  intersectsSelectedArea(f,polygons)
- );
- SELECTED.minor=DATA.minor.filter(f=>
-  intersectsSelectedArea(f,polygons)
- );
-
- businessTotal=SELECTED.ea.reduce((sum,f)=>
-  sum+(businessByEA.get(codeKey(eaCodeOf(f)))||0),0);
-
- renderLayers();
- updateAnalytics();
- zoomToSelection(false);
+function findKanifing(collection){
+  if(!collection || !collection.features) return null;
+  return collection.features.find(feature=>{
+    const name=normalize(getBoundaryName(feature));
+    return name.includes("kanifing");
+  })||null;
 }
 
-/* =========================================================
-   6. LEAFLET MAP
-   ========================================================= */
+function fillDistrictSelect(){
+  const select=$("districtSelect");
+  select.innerHTML='<option value="">All districts</option>';
 
-const map=L.map("map",{preferCanvas:true}).setView([13.453,-16.675],12);
+  if(!districtData || !districtData.features) return;
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
- maxZoom:20,
- attribution:'&copy; OpenStreetMap contributors'
-}).addTo(map);
+  const kmcBounds=turf.bbox(selectedLGA);
+  const names=new Set();
 
-const layers={
- ea:L.featureGroup().addTo(map),
- business:L.featureGroup().addTo(map),
- education:L.featureGroup().addTo(map),
- major:L.featureGroup().addTo(map),
- minor:L.featureGroup().addTo(map),
- properties:L.featureGroup().addTo(map)
-};
+  districtData.features.forEach(feature=>{
+    try{
+      if(!turf.booleanIntersects(feature,selectedLGA)) return;
+      const name=getBoundaryName(feature);
+      if(name && name!=="Unnamed") names.add(name);
+    }catch(e){}
+  });
 
-const C={
- ea:"#1769aa",business:"#e58a24",education:"#16865b",
- major:"#d64545",minor:"#805ad5",properties:"#00a6a6"
-};
-
-function popupHTML(title,feature){
- const p=feature.properties||{};
- const rows=Object.entries(p).slice(0,16).map(([k,v])=>
-  `<div><b>${escapeHTML(k)}:</b> ${escapeHTML(v)}</div>`
- ).join("");
- return `<div style="font-size:11px;max-height:220px;overflow:auto">
-  <b>${escapeHTML(title)}</b><hr>${rows||"No attributes"}
- </div>`;
+  [...names].sort().forEach(name=>{
+    const option=document.createElement("option");
+    option.value=name;
+    option.textContent=name;
+    select.appendChild(option);
+  });
 }
 
-function addGeoJSON(group,features,color,title,options={}){
- if(!features.length) return;
+function drawBoundaryLayers(){
+  Object.values(layerGroups).forEach(group=>group.clearLayers());
 
- L.geoJSON({type:"FeatureCollection",features},{
-  style:()=>{
-   return options.style||{
-    color,weight:options.weight||2,opacity:.9,
-    fillColor:color,fillOpacity:options.fillOpacity??.12
-   };
-  },
-  pointToLayer:(feature,latlng)=>L.circleMarker(latlng,{
-   radius:options.radius||5,color,weight:1,
-   fillColor:color,fillOpacity:.9
-  }),
-  onEachFeature:(feature,layer)=>{
-   layer.bindPopup(popupHTML(title,feature));
+  if(selectedLGA){
+    L.geoJSON(selectedLGA,{
+      style:{
+        color:"#102f50",weight:3,fillColor:"#5fa8d3",
+        fillOpacity:.10,dashArray:"7 4"
+      }
+    }).bindPopup("<b>Kanifing Municipal Council</b><br>Published LGA boundary")
+      .addTo(layerGroups.lga);
   }
- }).addTo(group);
+
+  if(districtData && $("districtToggle").checked){
+    districtData.features.forEach(feature=>{
+      try{
+        if(!selectedLGA || !turf.booleanIntersects(feature,selectedLGA)) return;
+        if(selectedDistrict &&
+          normalize(getBoundaryName(feature))!==normalize(selectedDistrict)) return;
+
+        L.geoJSON(feature,{
+          style:{
+            color:"#334155",weight:1.5,fillColor:"#94a3b8",
+            fillOpacity:.04
+          }
+        }).bindPopup("<b>"+escapeHTML(getBoundaryName(feature))+"</b><br>District boundary")
+          .addTo(layerGroups.district);
+      }catch(e){}
+    });
+  }
 }
 
-function businessStyle(feature){
- const count=businessByEA.get(codeKey(eaCodeOf(feature)))||0;
- let fill="#edf2f7";
- if(count>0 && count<=20) fill="#fee8a8";
- if(count>20 && count<=50) fill="#f6bd60";
- if(count>50 && count<=100) fill="#ee8c45";
- if(count>100) fill="#c44536";
-
- return {
-  color:"#9a5a19",weight:1.1,fillColor:fill,fillOpacity:.68
- };
+function getCurrentBoundary(){
+  if(selectedDistrict && districtData){
+    const found=districtData.features.find(f=>
+      normalize(getBoundaryName(f))===normalize(selectedDistrict));
+    if(found) return found;
+  }
+  return selectedLGA;
 }
 
-function renderLayers(){
- Object.values(layers).forEach(g=>g.clearLayers());
-
- if(document.getElementById("showEA").checked){
-  addGeoJSON(layers.ea,SELECTED.ea,C.ea,"Enumeration Area",{
-   style:{color:C.ea,weight:1.2,fillColor:C.ea,fillOpacity:.08}
-  });
- }
-
- if(document.getElementById("showBusiness").checked){
-  const features=SELECTED.ea.filter(f=>
-   businessByEA.has(codeKey(eaCodeOf(f)))
-  );
-  addGeoJSON(layers.business,features,C.business,"Business Count by EA",{
-   style:businessStyle
-  });
-
-  // Add the joined business count to the popup for clarity.
-  layers.business.eachLayer(layer=>{
-   // Feature properties are shown by the original EA popup.
-   // Business counts are available in the analytics and CSV export.
-  });
- }
-
- if(document.getElementById("showEducation").checked){
-  addGeoJSON(layers.education,SELECTED.education,C.education,"Education Facility",{
-   radius:6,weight:2
-  });
- }
-
- if(document.getElementById("showMajor").checked){
-  addGeoJSON(layers.major,SELECTED.major,C.major,"Major Road",{weight:3});
- }
-
- if(document.getElementById("showMinor").checked){
-  addGeoJSON(layers.minor,SELECTED.minor,C.minor,"Minor Road",{weight:2});
- }
-
- if(document.getElementById("showProperties").checked){
-  propertyRecords.forEach(r=>{
-   L.circleMarker([r.latitude,r.longitude],{
-    radius:7,color:C.properties,fillColor:C.properties,fillOpacity:1
-   }).bindPopup(`<b>${escapeHTML(r.id)}</b><br>
-    ${escapeHTML(r.type)}<br>${escapeHTML(r.condition)}`)
-    .addTo(layers.properties);
-  });
- }
-
- document.getElementById("nEA").textContent=SELECTED.ea.length;
- document.getElementById("nBusiness").textContent=businessTotal.toLocaleString();
- document.getElementById("nEducation").textContent=SELECTED.education.length;
- document.getElementById("nMajor").textContent=SELECTED.major.length;
- document.getElementById("nMinor").textContent=SELECTED.minor.length;
- document.getElementById("nProperties").textContent=propertyRecords.length;
-
- const total=SELECTED.ea.length+SELECTED.education.length+
-  SELECTED.major.length+SELECTED.minor.length;
-
- document.getElementById("mapInfo").textContent=
-  total.toLocaleString()+" selected spatial features";
- document.getElementById("selectionLabel").textContent=
-  [document.getElementById("lga").value,
-   document.getElementById("district").value,
-   document.getElementById("ward").value].join(" / ");
+function getBBox(feature){
+  const b=turf.bbox(feature);
+  return {
+    west:b[0],south:b[1],east:b[2],north:b[3]
+  };
 }
 
-function zoomToSelection(showMessage=true){
- const bounds=L.latLngBounds([]);
+/* Overpass requests are restricted to the selected area's bounding box.
+   Exact polygon filtering is then done in the browser. */
 
- // Zoom to selected EA geometries first.
- if(layers.ea.getLayers().length){
-  try{bounds.extend(layers.ea.getBounds());}catch(e){}
- }
- if(!bounds.isValid() && SELECTED.ea.length){
-  const temp=L.geoJSON({type:"FeatureCollection",features:SELECTED.ea});
-  try{bounds.extend(temp.getBounds());}catch(e){}
- }
+async function overpassRequest(query){
+  let lastError=null;
+  for(const endpoint of OVERPASS_ENDPOINTS){
+    try{
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),120000);
 
- if(bounds.isValid()) map.fitBounds(bounds.pad(.08),{maxZoom:17});
- else map.setView([13.453,-16.675],12);
+      const response=await fetch(endpoint,{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+        body:"data="+encodeURIComponent(query),
+        signal:controller.signal
+      });
 
- if(showMessage)setStatus("Zoomed to selected area","#16865b");
+      clearTimeout(timer);
+      if(!response.ok) throw new Error("Overpass HTTP "+response.status);
+
+      const data=await response.json();
+      if(data.remark && !data.elements?.length){
+        throw new Error(data.remark);
+      }
+      return data;
+    }catch(error){
+      lastError=error;
+    }
+  }
+  throw lastError||new Error("All Overpass servers failed");
 }
 
-function resetFilters(){
- document.getElementById("lga").value="ALL";
- document.getElementById("district").value="ALL";
- document.getElementById("ward").value="ALL";
- document.getElementById("search").value="";
- updateDistricts();
- applyFilters();
+function buildInfrastructureQuery(boundary){
+  const b=getBBox(boundary);
+  const box=`(${b.south},${b.west},${b.north},${b.east})`;
+
+  return `
+[out:json][timeout:90];
+(
+  nwr["shop"]${box};
+  nwr["office"]${box};
+  nwr["craft"]${box};
+  nwr["amenity"="marketplace"]${box};
+  nwr["amenity"="bank"]${box};
+  nwr["amenity"="fuel"]${box};
+  nwr["amenity"="restaurant"]${box};
+  nwr["amenity"="cafe"]${box};
+  nwr["amenity"="fast_food"]${box};
+
+  nwr["amenity"~"^(school|college|university|kindergarten)$"]${box};
+  nwr["education"]${box};
+
+  nwr["amenity"~"^(hospital|clinic|doctors|dentist|pharmacy)$"]${box};
+  nwr["healthcare"]${box};
+);
+out center;
+`;
 }
 
-/* =========================================================
-   7. ANALYTICS
-   ========================================================= */
+function buildRoadQuery(boundary){
+  const b=getBBox(boundary);
+  const box=`(${b.south},${b.west},${b.north},${b.east})`;
+
+  return `
+[out:json][timeout:90];
+(
+  way["highway"]${box};
+);
+out geom;
+`;
+}
+
+function osmElementToPoint(element){
+  let lon,lat;
+
+  if(element.type==="node"){
+    lon=element.lon;lat=element.lat;
+  }else if(element.center){
+    lon=element.center.lon;lat=element.center.lat;
+  }else if(element.lat!==undefined && element.lon!==undefined){
+    lon=element.lon;lat=element.lat;
+  }
+
+  if(!Number.isFinite(lon)||!Number.isFinite(lat)) return null;
+
+  return turf.point([lon,lat],{
+    osm_id:element.id,
+    osm_type:element.type,
+    ...(element.tags||{})
+  });
+}
+
+function osmElementToLine(element){
+  if(!element.geometry || element.geometry.length<2) return null;
+  const coordinates=element.geometry
+    .filter(p=>Number.isFinite(p.lon)&&Number.isFinite(p.lat))
+    .map(p=>[p.lon,p.lat]);
+
+  if(coordinates.length<2) return null;
+
+  return turf.lineString(coordinates,{
+    osm_id:element.id,
+    osm_type:element.type,
+    ...(element.tags||{})
+  });
+}
+
+function insideBoundary(feature,boundary){
+  try{
+    if(feature.geometry.type==="Point"){
+      return turf.booleanPointInPolygon(feature,boundary,{ignoreBoundary:false});
+    }
+    return turf.booleanIntersects(feature,boundary);
+  }catch(error){
+    return false;
+  }
+}
+
+function classifyFacility(element){
+  const tags=element.tags||{};
+  const amenity=normalize(tags.amenity);
+  const shop=normalize(tags.shop);
+  const office=normalize(tags.office);
+  const craft=normalize(tags.craft);
+  const healthcare=normalize(tags.healthcare);
+  const education=normalize(tags.education);
+
+  if(
+    ["school","college","university","kindergarten"].includes(amenity) ||
+    education || tags["isced:level"]
+  ) return "education";
+
+  if(
+    ["hospital","clinic","doctors","dentist","pharmacy"].includes(amenity) ||
+    healthcare
+  ) return "health";
+
+  if(
+    shop || office || craft ||
+    ["marketplace","bank","fuel","restaurant","cafe","fastfood"].includes(amenity)
+  ) return "business";
+
+  return null;
+}
+
+function featureLabel(feature){
+  const p=feature.properties||{};
+  return p.name || p.brand || p.operator || p.shop ||
+         p.amenity || p.highway || "Unnamed mapped feature";
+}
+
+function popupForFacility(feature,category){
+  const p=feature.properties||{};
+  const title=escapeHTML(featureLabel(feature));
+  const categoryLabel={
+    business:"Business / commercial",
+    education:"Education facility",
+    health:"Health facility"
+  }[category];
+
+  const details=[
+    ["Category",categoryLabel],
+    ["Name",p.name],
+    ["Type",p.shop||p.amenity||p.office||p.healthcare||p.education],
+    ["Operator",p.operator],
+    ["Address",[
+      p["addr:street"],p["addr:suburb"],p["addr:city"]
+    ].filter(Boolean).join(", ")]
+  ].filter(item=>item[1]);
+
+  return "<b>"+title+"</b><br>"+details.map(item=>
+    "<b>"+escapeHTML(item[0])+":</b> "+escapeHTML(item[1])
+  ).join("<br>")+"<br><small>OSM ID: "+escapeHTML(p.osm_id)+"</small>";
+}
+
+function renderFacilities(){
+  ["business","education","health"].forEach(category=>{
+    layerGroups[category].clearLayers();
+
+    const enabled=$(category+"Toggle").checked;
+    if(!enabled) return;
+
+    const color={
+      business:"#e87922",
+      education:"#8b5cf6",
+      health:"#dc4560"
+    }[category];
+
+    allFacilities[category].forEach(feature=>{
+      const marker=L.circleMarker(
+        [feature.geometry.coordinates[1],feature.geometry.coordinates[0]],
+        {
+          radius:5,color:"#fff",weight:1,
+          fillColor:color,fillOpacity:.9
+        }
+      );
+      marker.bindPopup(popupForFacility(feature,category));
+      marker.addTo(layerGroups[category]);
+    });
+  });
+}
+
+function renderRoads(){
+  layerGroups.major.clearLayers();
+  layerGroups.minor.clearLayers();
+
+  allRoads.major.forEach(feature=>{
+    if(!$("majorToggle").checked) return;
+    L.geoJSON(feature,{
+      style:{color:"#d62728",weight:3,opacity:.85}
+    }).bindPopup(roadPopup(feature)).addTo(layerGroups.major);
+  });
+
+  allRoads.minor.forEach(feature=>{
+    if(!$("minorToggle").checked) return;
+    L.geoJSON(feature,{
+      style:{color:"#2676bd",weight:1.6,opacity:.8}
+    }).bindPopup(roadPopup(feature)).addTo(layerGroups.minor);
+  });
+}
+
+function roadPopup(feature){
+  const p=feature.properties||{};
+  return "<b>"+escapeHTML(p.name||"Unnamed road")+"</b><br>"+
+    "Road class: "+escapeHTML(p.highway||"Not specified")+"<br>"+
+    "Surface: "+escapeHTML(p.surface||"Not recorded")+"<br>"+
+    "OSM ID: "+escapeHTML(p.osm_id||"");
+}
+
+function renderAll(){
+  drawBoundaryLayers();
+  renderFacilities();
+  renderRoads();
+  updateAnalytics();
+  updateMapCount();
+}
+
+function updateMapCount(){
+  const count=
+    allFacilities.business.length+
+    allFacilities.education.length+
+    allFacilities.health.length+
+    allRoads.major.length+
+    allRoads.minor.length;
+
+  $("mapCount").textContent=numberFormat(count)+" features";
+}
 
 function updateAnalytics(){
- const population=SELECTED.ea.reduce((sum,f)=>sum+
-  numberValue(getValue(f,["sum_pop","population","pop","total_population"])),0);
+  const business=allFacilities.business.length;
+  const education=allFacilities.education.length;
+  const health=allFacilities.health.length;
+  const major=allRoads.major.length;
+  const minor=allRoads.minor.length;
 
- const households=SELECTED.ea.reduce((sum,f)=>sum+
-  numberValue(getValue(f,["sum_hhs","households","hh","total_households"])),0);
+  $("kpiBusiness").textContent=numberFormat(business);
+  $("kpiEducation").textContent=numberFormat(education);
+  $("kpiHealth").textContent=numberFormat(health);
+  $("kpiRoads").textContent=numberFormat(major+minor);
 
- document.getElementById("kEA").textContent=SELECTED.ea.length.toLocaleString();
- document.getElementById("kBusiness").textContent=businessTotal.toLocaleString();
- document.getElementById("kEducation").textContent=SELECTED.education.length.toLocaleString();
- document.getElementById("kMajor").textContent=SELECTED.major.length.toLocaleString();
- document.getElementById("kMinor").textContent=SELECTED.minor.length.toLocaleString();
- document.getElementById("kProperties").textContent=propertyRecords.length.toLocaleString();
+  updateChart("distributionChart","bar",
+    ["Businesses","Education","Health","Roads"],
+    [business,education,health,major+minor],
+    ["#e87922","#8b5cf6","#dc4560","#2676bd"]);
 
- if(chart) chart.destroy();
+  updateChart("roadChart","doughnut",
+    ["Major roads","Minor roads"],
+    [major,minor],
+    ["#d62728","#2676bd"]);
 
- chart=new Chart(document.getElementById("infraChart"),{
-  type:"bar",
-  data:{
-   labels:["Businesses","Education","Major Roads","Minor Roads","Properties"],
-   datasets:[{
-    label:"Count",
-    data:[
-     businessTotal,SELECTED.education.length,SELECTED.major.length,
-     SELECTED.minor.length,propertyRecords.length
-    ],
-    backgroundColor:["#e58a24","#16865b","#d64545","#805ad5","#00a6a6"],
-    borderRadius:5
-   }]
-  },
-  options:{
-   responsive:true,maintainAspectRatio:false,
-   plugins:{legend:{display:false}},
-   scales:{y:{beginAtZero:true,ticks:{precision:0}}}
+  $("selectionSummary").innerHTML=
+    "<b>LGA:</b> "+escapeHTML(getBoundaryName(selectedLGA))+"<br>"+
+    "<b>District:</b> "+escapeHTML(selectedDistrict||"All districts")+"<br>"+
+    "<b>Businesses:</b> "+numberFormat(business)+"<br>"+
+    "<b>Education:</b> "+numberFormat(education)+"<br>"+
+    "<b>Health:</b> "+numberFormat(health)+"<br>"+
+    "<b>Major road features:</b> "+numberFormat(major)+"<br>"+
+    "<b>Minor road features:</b> "+numberFormat(minor);
+}
+
+function updateChart(canvasId,type,labels,values,colors){
+  if(charts[canvasId]) charts[canvasId].destroy();
+
+  charts[canvasId]=new Chart($(canvasId),{
+    type,
+    data:{
+      labels,
+      datasets:[{
+        data:values,
+        backgroundColor:colors,
+        borderColor:colors,
+        borderWidth:1,
+        borderRadius:type==="bar"?5:0
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:type==="doughnut",
+          position:"bottom",
+          labels:{boxWidth:10,font:{size:10}}
+        },
+        tooltip:{enabled:true}
+      },
+      scales:type==="bar"?{
+        y:{
+          beginAtZero:true,
+          ticks:{precision:0,font:{size:9}},
+          grid:{color:"#edf1f5"}
+        },
+        x:{
+          ticks:{font:{size:9}},
+          grid:{display:false}
+        }
+      }:{}
+    }
+  });
+}
+
+async function loadBoundaries(){
+  setStatus("Loading administrative boundaries...",false);
+  setProgress(10);
+
+  const diagnostics=[];
+
+  try{
+    const adm1=await fetchBoundary("ADM1");
+    lgaData=adm1;
+    selectedLGA=findKanifing(adm1);
+
+    if(!selectedLGA){
+      throw new Error("Kanifing not found in the Gambia ADM1 boundary file");
+    }
+
+    diagnostics.push("<span class='ok'>✓</span> LGA boundary source loaded: "+
+      adm1.features.length+" features");
+
+    try{
+      const adm2=await fetchBoundary("ADM2");
+      districtData=adm2;
+      diagnostics.push("<span class='ok'>✓</span> District source loaded: "+
+        adm2.features.length+" features");
+    }catch(error){
+      districtData=null;
+      diagnostics.push("<span class='bad'>✕</span> District source: "+
+        escapeHTML(error.message));
+    }
+
+    $("lgaSelect").innerHTML=
+      '<option value="Kanifing">Kanifing</option>';
+
+    fillDistrictSelect();
+    drawBoundaryLayers();
+
+    map.fitBounds(L.geoJSON(selectedLGA).getBounds(),{padding:[20,20]});
+    setDiagnostics(diagnostics);
+    setProgress(35);
+    return true;
+
+  }catch(error){
+    diagnostics.push("<span class='bad'>✕</span> Boundary error: "+
+      escapeHTML(error.message));
+    setDiagnostics(diagnostics);
+    setStatus("Boundary source unavailable",false);
+    return false;
   }
- });
-
- document.getElementById("eaSummary").innerHTML=`
-  <div><b>Selected EAs:</b> ${SELECTED.ea.length.toLocaleString()}</div>
-  <div><b>Population:</b> ${population.toLocaleString()}</div>
-  <div><b>Households:</b> ${households.toLocaleString()}</div>
-  <div><b>Business count:</b> ${businessTotal.toLocaleString()}</div>
-  <div><b>Education features:</b> ${SELECTED.education.length.toLocaleString()}</div>
-  <div><b>Major road features:</b> ${SELECTED.major.length.toLocaleString()}</div>
-  <div><b>Minor road features:</b> ${SELECTED.minor.length.toLocaleString()}</div>
-  <hr>
-  <span class="small">Population and household totals use the attributes available in the EA file. Business totals are joined by EA code.</span>
- `;
-
- updateQuality();
 }
 
-function updateQuality(){
- const missingEA=SELECTED.ea.filter(f=>!f.geometry).length;
- const missingCode=SELECTED.ea.filter(f=>!eaCodeOf(f)).length;
- const unmatched=SELECTED.ea.filter(f=>
-  !businessByEA.has(codeKey(eaCodeOf(f)))
- ).length;
+async function loadInfrastructure(){
+  if(!selectedLGA) throw new Error("KMC boundary is not loaded");
 
- document.getElementById("quality").innerHTML=`
-  <div><b>Selected EAs without geometry:</b> ${missingEA}</div>
-  <div><b>Selected EAs without EA code:</b> ${missingCode}</div>
-  <div><b>Selected EAs without business match:</b> ${unmatched}</div>
-  <div><b>Business CSV rows:</b> ${DATA.business.length}</div>
-  <div><b>Business EA join keys:</b> ${businessByEA.size}</div>
-  <div><b>Education source features:</b> ${DATA.education.length}</div>
-  <div><b>Major road source features:</b> ${DATA.major.length}</div>
-  <div><b>Minor road source features:</b> ${DATA.minor.length}</div>
- `;
+  const boundary=getCurrentBoundary()||selectedLGA;
+  const diagnostics=[];
+  const boundaryName=getBoundaryName(boundary);
+
+  setStatus("Extracting OpenStreetMap data...",false);
+  setProgress(40);
+
+  const facilityQuery=buildInfrastructureQuery(boundary);
+  const roadQuery=buildRoadQuery(boundary);
+
+  // Facilities request
+  try{
+    const data=await overpassRequest(facilityQuery);
+    lastOSMTimestamp=data.osm3s?.timestamp_osm_base||null;
+
+    const facilities={business:[],education:[],health:[]};
+    const seen=new Set();
+
+    (data.elements||[]).forEach(element=>{
+      const category=classifyFacility(element);
+      if(!category) return;
+
+      const feature=osmElementToPoint(element);
+      if(!feature) return;
+
+      const key=element.type+"-"+element.id+"-"+category;
+      if(seen.has(key)) return;
+      seen.add(key);
+
+      if(insideBoundary(feature,boundary)){
+        facilities[category].push(feature);
+      }
+    });
+
+    allFacilities=facilities;
+
+    diagnostics.push("<span class='ok'>✓</span> OSM facility query: "+
+      (data.elements||[]).length+" returned elements");
+    diagnostics.push("Businesses: "+allFacilities.business.length);
+    diagnostics.push("Education: "+allFacilities.education.length);
+    diagnostics.push("Health: "+allFacilities.health.length);
+
+  }catch(error){
+    allFacilities={business:[],education:[],health:[]};
+    diagnostics.push("<span class='bad'>✕</span> Facility query failed: "+
+      escapeHTML(error.message));
+  }
+
+  setProgress(68);
+
+  // Roads request
+  try{
+    const data=await overpassRequest(roadQuery);
+    lastOSMTimestamp=data.osm3s?.timestamp_osm_base||lastOSMTimestamp;
+
+    const major=[];
+    const minor=[];
+    const seenRoads=new Set();
+
+    (data.elements||[]).forEach(element=>{
+      if(element.type!=="way") return;
+
+      const feature=osmElementToLine(element);
+      if(!feature) return;
+
+      const key=String(element.id);
+      if(seenRoads.has(key)) return;
+      seenRoads.add(key);
+
+      if(!insideBoundary(feature,boundary)) return;
+
+      const highway=normalize(element.tags?.highway);
+
+      const majorClasses=[
+        "motorway","motorwaylink","trunk","trunklink",
+        "primary","primarylink","secondary","secondarylink"
+      ];
+
+      if(majorClasses.includes(highway)){
+        major.push(feature);
+      }else{
+        minor.push(feature);
+      }
+    });
+
+    allRoads={major,minor};
+
+    diagnostics.push("<span class='ok'>✓</span> OSM road query: "+
+      (data.elements||[]).length+" returned elements");
+    diagnostics.push("Major road features: "+major.length);
+    diagnostics.push("Minor road features: "+minor.length);
+
+  }catch(error){
+    allRoads={major:[],minor:[]};
+    diagnostics.push("<span class='bad'>✕</span> Road query failed: "+
+      escapeHTML(error.message));
+  }
+
+  setProgress(90);
+  renderAll();
+
+  if(lastOSMTimestamp){
+    $("lastUpdated").textContent="OSM data timestamp: "+lastOSMTimestamp;
+  }else{
+    $("lastUpdated").textContent="Retrieved: "+new Date().toLocaleString();
+  }
+
+  diagnostics.push("<br><b>Selected boundary:</b> "+escapeHTML(boundaryName));
+  diagnostics.push("<b>OSM source:</b> OpenStreetMap Overpass API");
+  diagnostics.push("<b>Boundary filter:</b> Exact geometry intersection");
+
+  setDiagnostics(diagnostics);
+  setProgress(100);
+  setStatus("Online extraction completed",true);
 }
 
-/* =========================================================
-   8. PROPERTY CAPTURE
-   ========================================================= */
+async function loadAll(){
+  if(requestRunning) return;
+  requestRunning=true;
 
-function startCapture(){
- captureMode=true;
- document.getElementById("captureStatus").textContent=
-  "Capture mode active. Click the map to record the property.";
- setStatus("Click the map to capture property location");
+  $("refreshBtn").disabled=true;
+  $("applyBtn").disabled=true;
+
+  try{
+    if(!selectedLGA){
+      const ok=await loadBoundaries();
+      if(!ok) return;
+    }
+    await loadInfrastructure();
+  }catch(error){
+    setStatus("Data extraction failed",false);
+    setDiagnostics([
+      "<span class='bad'>✕</span> "+escapeHTML(error.message)
+    ]);
+  }finally{
+    requestRunning=false;
+    $("refreshBtn").disabled=false;
+    $("applyBtn").disabled=false;
+  }
 }
 
-map.on("click",e=>{
- if(!captureMode)return;
- captureMode=false;
- saveProperty(e.latlng.lat,e.latlng.lng);
+/* Administrative selection */
+function applySelection(){
+  const selectedName=$("districtSelect").value;
+  selectedDistrict=selectedName||null;
+
+  const boundary=getCurrentBoundary();
+  if(boundary){
+    map.fitBounds(L.geoJSON(boundary).getBounds(),{padding:[20,20]});
+  }
+  loadAll();
+}
+
+function resetSelection(){
+  selectedDistrict=null;
+  $("districtSelect").value="";
+  if(selectedLGA){
+    map.fitBounds(L.geoJSON(selectedLGA).getBounds(),{padding:[20,20]});
+  }
+  loadAll();
+}
+
+/* Layer visibility */
+[
+  "businessToggle","educationToggle","healthToggle",
+  "majorToggle","minorToggle","districtToggle"
+].forEach(id=>{
+  $(id).addEventListener("change",()=>{
+    if(id==="districtToggle"){
+      drawBoundaryLayers();
+    }
+    renderFacilities();
+    renderRoads();
+    updateMapCount();
+  });
 });
 
-function captureGPS(){
- if(!navigator.geolocation){
-  alert("Geolocation is not supported.");
-  return;
- }
- document.getElementById("captureStatus").textContent="Acquiring GPS...";
- navigator.geolocation.getCurrentPosition(
-  p=>saveProperty(p.coords.latitude,p.coords.longitude),
-  e=>document.getElementById("captureStatus").textContent="GPS error: "+e.message,
-  {enableHighAccuracy:true,timeout:15000,maximumAge:0}
- );
+/* Basemap switch */
+$("basemapSelect").addEventListener("change",event=>{
+  map.removeLayer(activeBase);
+  activeBase=baseLayers[event.target.value]||baseLayers.osm;
+  activeBase.addTo(map);
+});
+
+/* Export helpers */
+function downloadBlob(content,filename,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);
+  a.click();a.remove();
+  URL.revokeObjectURL(url);
 }
 
-function saveProperty(latitude,longitude){
- const id=document.getElementById("propertyID").value.trim()||
-  "KMC-PROP-"+String(propertyRecords.length+1).padStart(5,"0");
-
- const record={
-  id,
-  type:document.getElementById("propertyType").value,
-  condition:document.getElementById("condition").value,
-  floors:numberValue(document.getElementById("floors").value),
-  households:numberValue(document.getElementById("households").value),
-  notes:document.getElementById("notes").value,
-  lga:document.getElementById("lga").value,
-  district:document.getElementById("district").value,
-  ward:document.getElementById("ward").value,
-  latitude,longitude,
-  collected_at:new Date().toISOString()
- };
-
- propertyRecords.push(record);
- renderLayers();
- updateAnalytics();
- renderRecords();
- map.setView([latitude,longitude],18);
-
- document.getElementById("captureStatus").textContent=
-  "Captured: "+latitude.toFixed(6)+", "+longitude.toFixed(6);
- document.getElementById("propertyID").value="";
- document.getElementById("notes").value="";
+function csvEscape(value){
+  const text=String(value??"");
+  return '"'+text.replace(/"/g,'""')+'"';
 }
 
-function renderRecords(){
- const el=document.getElementById("records");
- if(!propertyRecords.length){
-  el.textContent="No records collected.";
-  return;
- }
- el.innerHTML=propertyRecords.slice(-8).reverse().map(r=>`
-  <div class="record">
-   <strong>${escapeHTML(r.id)}</strong>
-   ${escapeHTML(r.type)} | ${escapeHTML(r.condition)}
-   <div class="small">${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}</div>
-  </div>
- `).join("");
-}
+function exportFacilities(){
+  const rows=[["category","name","type","operator","osm_id","longitude","latitude"]];
 
-/* =========================================================
-   9. EXPORT FUNCTIONS
-   ========================================================= */
-
-function download(content,filename,mime){
- const blob=new Blob([content],{type:mime});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;a.download=filename;
- document.body.appendChild(a);a.click();a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-
-function exportPropertiesCSV(){
- if(!propertyRecords.length)return alert("No property records collected.");
- download(Papa.unparse(propertyRecords),"KMC_Property_Records.csv","text/csv");
-}
-
-function exportPropertiesGeoJSON(){
- if(!propertyRecords.length)return alert("No property records collected.");
- const geo={
-  type:"FeatureCollection",
-  features:propertyRecords.map(r=>({
-   type:"Feature",
-   geometry:{type:"Point",coordinates:[r.longitude,r.latitude]},
-   properties:{...r}
-  }))
- };
- download(JSON.stringify(geo,null,2),"KMC_Property_Records.geojson","application/geo+json");
-}
-
-function exportBusinessCSV(){
- const rows=SELECTED.ea.map(f=>({
-  EA_CODE:eaCodeOf(f),
-  EA_NAME:eaNameOf(f),
-  LGA:lgaOf(f),
-  DISTRICT:districtOf(f),
-  WARD:wardOf(f),
-  BUSINESS_ENTITY:businessByEA.get(codeKey(eaCodeOf(f)))||0
- }));
- download(Papa.unparse(rows),"KMC_Business_By_Selected_EA.csv","text/csv");
-}
-
-function exportEACSV(){
- if(!SELECTED.ea.length)return alert("No selected EAs.");
- download(Papa.unparse(SELECTED.ea.map(f=>f.properties||{})),
-  "KMC_Selected_EAs.csv","text/csv");
-}
-
-function exportVisible(){
- const features=[];
-
- if(document.getElementById("showEA").checked)
-  features.push(...SELECTED.ea);
-
- if(document.getElementById("showEducation").checked)
-  features.push(...SELECTED.education);
-
- if(document.getElementById("showMajor").checked)
-  features.push(...SELECTED.major);
-
- if(document.getElementById("showMinor").checked)
-  features.push(...SELECTED.minor);
-
- // Add business count as an attribute to each matched EA polygon.
- if(document.getElementById("showBusiness").checked){
-  SELECTED.ea.filter(f=>businessByEA.has(codeKey(eaCodeOf(f))))
-   .forEach(f=>{
-    features.push({
-     ...f,
-     properties:{
-      ...(f.properties||{}),
-      BUSINESS_ENTITY:businessByEA.get(codeKey(eaCodeOf(f)))||0
-     }
+  Object.entries(allFacilities).forEach(([category,features])=>{
+    features.forEach(feature=>{
+      const p=feature.properties||{};
+      rows.push([
+        category,
+        p.name||"",
+        p.shop||p.amenity||p.office||p.healthcare||p.education||"",
+        p.operator||"",
+        p.osm_id||"",
+        feature.geometry.coordinates[0],
+        feature.geometry.coordinates[1]
+      ]);
     });
-   });
- }
+  });
 
- propertyRecords.forEach(r=>features.push({
-  type:"Feature",
-  geometry:{type:"Point",coordinates:[r.longitude,r.latitude]},
-  properties:{...r}
- }));
-
- download(JSON.stringify({type:"FeatureCollection",features},null,2),
-  "KMC_Visible_Spatial_Data.geojson","application/geo+json");
+  const csv=rows.map(row=>row.map(csvEscape).join(",")).join("\n");
+  downloadBlob(csv,"KMC_OSM_Facilities.csv","text/csv;charset=utf-8");
 }
 
-/* =========================================================
-   10. START
-   ========================================================= */
+function exportRoads(){
+  const features=[...allRoads.major,...allRoads.minor];
+  const collection=featureCollection(features);
+  downloadBlob(
+    JSON.stringify(collection,null,2),
+    "KMC_OSM_Road_Network.geojson",
+    "application/geo+json"
+  );
+}
 
-loadAllData();
+$("applyBtn").addEventListener("click",applySelection);
+$("resetBtn").addEventListener("click",resetSelection);
+$("refreshBtn").addEventListener("click",loadAll);
+$("exportFacilitiesBtn").addEventListener("click",exportFacilities);
+$("exportRoadsBtn").addEventListener("click",exportRoads);
 
+$("zoomBtn").addEventListener("click",()=>{
+  const boundary=getCurrentBoundary();
+  if(boundary) map.fitBounds(L.geoJSON(boundary).getBounds(),{padding:[20,20]});
+});
+
+$("homeBtn").addEventListener("click",()=>{
+  if(selectedLGA) map.fitBounds(L.geoJSON(selectedLGA).getBounds(),{padding:[20,20]});
+});
+
+/* Start application */
+(async function init(){
+  setStatus("Connecting to online sources...",false);
+  const ok=await loadBoundaries();
+  if(ok) await loadInfrastructure();
+})();
 </script>
 </body>
 </html>
+
 
